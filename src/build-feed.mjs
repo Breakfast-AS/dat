@@ -183,7 +183,11 @@ export function parseForestilling(slug, h, farger) {
     description,
     price: pris,
     scene: kv.Scene || heroScene,
-    spilles: kv.Spilles || lagSpilles(datoer, tid),
+    // Bruk teksten fra nettsiden hvis den er kort (f.eks. "Tirsdager kl 19").
+    // Er den for lang og det er flere datoer: "Flere forestillinger". Ellers lag en selv.
+    spilles: !kv.Spilles ? lagSpilles(datoer, tid)
+      : kv.Spilles.length <= MAKS_SPILLES ? kv.Spilles
+        : datoer.length > 1 ? 'Flere forestillinger' : lagSpilles(datoer, tid),
     text_color: fg,
     bg_color: f.bg,
     accent_color: f.btn || f.bg,
@@ -206,9 +210,16 @@ export function lagSpilles(datoer, tid) {
     if (mnd.length && mnd.at(-1).navn === navn) mnd.at(-1).dager.push(`${d.getDate()}.`);
     else mnd.push({ navn, dager: [`${d.getDate()}.`] });
   }
-  if (datoer.length <= 4) return `${liste(mnd.map((x) => `${liste(x.dager)} ${x.navn}`))} ${kl}`;
+  if (datoer.length <= 3) {
+    const tekst = `${liste(mnd.map((x) => `${liste(x.dager)} ${x.navn}`))} ${kl}`;
+    if (tekst.length <= MAKS_SPILLES) return tekst;
+  }
+  if (datoer.length <= 4) return 'Flere forestillinger';
   return mnd.length === 1 ? `Utvalgte datoer i ${mnd[0].navn}` : `Utvalgte datoer ${mnd[0].navn}–${mnd.at(-1).navn}`;
 }
+
+/** Maks lengde på "spilles" før vi forkorter */
+const MAKS_SPILLES = 30;
 
 const liste = (xs) => (xs.length === 1 ? xs[0] : `${xs.slice(0, -1).join(', ')} og ${xs.at(-1)}`);
 
