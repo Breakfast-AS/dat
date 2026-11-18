@@ -38,4 +38,3 @@ node src/build-feed.mjs   # krever Node 22+
 
 `id` er URL-sluggen der æ/ø/å er byttet ut med ae/o/a (`jævla-klassiker` → `jaevla-klassiker`),
 samme regel som GTM-scriptet for Meta-pikselen bruker.
-# dat

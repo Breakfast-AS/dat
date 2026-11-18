@@ -1,0 +1,44 @@
+name: Oppdater feed
+
+on:
+  schedule:
+    - cron: '17 * * * *' # hver time (17 over, for å unngå køen på hel time)
+  workflow_dispatch: # mulighet for å kjøre manuelt fra Actions-fanen
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - '.github/workflows/feed.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: feed
+  cancel-in-progress: false
+
+jobs:
+  feed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Bygg feed
+        run: node src/build-feed.mjs
+
+      - name: Lagre endringer
+        run: |
+          if git diff --quiet -- docs/feed.csv; then
+            echo "Ingen endringer i feeden."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/feed.csv
+          git commit -m "Oppdater feed $(date -u +'%Y-%m-%d %H:%M') UTC"
+          git push

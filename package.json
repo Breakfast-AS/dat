@@ -1,0 +1,10 @@
+{
+  "name": "dat-feed",
+  "private": true,
+  "type": "module",
+  "description": "Produktfeed for Det Andre Teatret, oppdateres hver time via GitHub Actions",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "build": "node src/build-feed.mjs"
+  }
+}
